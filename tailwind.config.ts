@@ -83,7 +83,7 @@ const config: Config = {
       fontFamily: {
         sans: ["'Plus Jakarta Sans'", "sans-serif"],
         headline: ["'Plus Jakarta Sans'", "sans-serif"],
-        body: ["Inter", "sans-serif"],
+        body: ["'Plus Jakarta Sans'", "sans-serif"],
       },
       fontSize: {
         "headline-xl": ["48px", { lineHeight: "56px", letterSpacing: "-0.025em", fontWeight: "700" }],
@@ -98,6 +98,7 @@ const config: Config = {
         "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }],
         "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }],
         "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.03em", fontWeight: "600" }],
+        "label-caps": ["11px", { lineHeight: "16px", letterSpacing: "0.08em", fontWeight: "700" }],
       },
       borderRadius: {
         sm: "0.25rem", // 4px
