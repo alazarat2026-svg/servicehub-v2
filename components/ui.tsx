@@ -442,3 +442,119 @@ export function MetricBlock({
     </div>
   );
 }
+export interface DenseProviderCardProps {
+  name: string;
+  trade: string;
+  rating: number;
+  reviewCount?: number;
+  portraitUrl?: string;
+  quote?: string;
+  rate?: string;
+  tags?: string[];
+  onViewProfile?: () => void;
+  onBook?: () => void;
+  viewProfileText?: string;
+  bookText?: string;
+  className?: string;
+}
+
+export function DenseProviderCard({
+  name,
+  trade,
+  rating,
+  reviewCount,
+  portraitUrl,
+  quote,
+  rate,
+  tags,
+  onViewProfile,
+  onBook,
+  viewProfileText = "Profile",
+  bookText = "Book Instant",
+  className = "",
+}: DenseProviderCardProps) {
+  return (
+    <div
+      className={`bg-white rounded-xl border border-border shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 flex flex-col ${className}`}
+    >
+      {/* Top Pane: Image */}
+      <div className="relative w-full h-40 bg-surface-container overflow-hidden">
+        {portraitUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={portraitUrl}
+            alt={name}
+            className="w-full h-40 object-cover rounded-t-xl"
+          />
+        ) : (
+          <div className="w-full h-40 bg-gradient-to-br from-surface-container-low via-surface-container to-surface-dim" />
+        )}
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+
+        {/* Floating badge top-left */}
+        <span className="absolute top-3 left-3 bg-teal-600 text-white text-xs font-semibold px-2 py-1 rounded">
+          Austin Top Pro 2025
+        </span>
+
+        {/* Floating rating badge top-right */}
+        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded flex items-center gap-1 text-xs font-bold text-gray-900">
+          <StarIcon className="w-3.5 h-3.5 text-amber-500" />
+          {rating}
+          {reviewCount !== undefined && (
+            <span className="text-gray-500 font-normal">({reviewCount})</span>
+          )}
+        </span>
+
+        {/* Name overlay */}
+        <div className="absolute bottom-3 left-3 text-white">
+          <h3 className="text-lg font-bold text-white leading-tight">{name}</h3>
+          <p className="text-sm text-gray-500 text-white/90">{trade}</p>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="p-4 flex-1 flex flex-col gap-3">
+        {quote && (
+          <div className="bg-gray-50 p-3 rounded-lg text-sm italic text-gray-700">
+            &ldquo;{quote}&rdquo;
+          </div>
+        )}
+
+        {tags && tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((t) => (
+              <span
+                key={t}
+                className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md px-2 py-0.5 rounded"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between gap-2">
+        {rate && (
+          <div className="flex flex-col">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              Starting Rate
+            </span>
+            <span className="text-sm font-semibold text-gray-900">{rate}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-2 ml-auto">
+          <Button variant="outline" size="sm" onClick={onViewProfile}>
+            {viewProfileText}
+          </Button>
+          <Button variant="secondary" size="sm" onClick={onBook}>
+            {bookText}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
