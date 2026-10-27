@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Button, CheckShieldIcon } from "@/components/ui";
 import { ChevronRight, BadgeCheck, Calendar, MessageSquare, ShieldCheck, Shield, MapPin, Zap, Award, Star, ChevronDown, ArrowRight, CheckCircle2, Lock, Headphones, Clock } from "lucide-react";
 
@@ -11,14 +12,14 @@ export default function ProfilePage() {
         <div className="max-w-7xl w-full mx-auto flex items-center justify-between">
           {/* Left: Brand Logo + Location Pill */}
           <div className="flex items-center gap-5">
-            <a href="#" className="flex items-center gap-2.5 group">
+            <Link href="/" className="flex items-center gap-2.5 group">
               <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center shrink-0 shadow-sm">
                 <CheckShieldIcon className="w-5 h-5 text-secondary" />
               </div>
               <span className="text-xl font-bold tracking-tight text-primary">
                 Service<span className="text-secondary">Hub</span>
               </span>
-            </a>
+            </Link>
 
             {/* Location Selector Pill */}
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-border rounded-full text-sm text-primary cursor-pointer hover:bg-surface-container transition-colors">
@@ -62,12 +63,12 @@ export default function ProfilePage() {
 
           {/* Center: Navigation Pills */}
           <nav className="hidden md:flex items-center gap-1 p-1 bg-surface-container-low rounded-full border border-border/70">
-            <a
-              href="#"
+            <Link
+              href="/search"
               className="px-4 py-1.5 rounded-full text-xs font-semibold bg-primary text-white shadow-sm transition-colors"
             >
               Find Pros
-            </a>
+            </Link>
             <a
               href="#services"
               className="px-4 py-1.5 rounded-full text-xs font-medium text-neutral hover:text-primary transition-colors"
@@ -162,7 +163,7 @@ export default function ProfilePage() {
         <p className="text-sm text-on-surface-variant mt-0.5">420 verified client reviews · 8 years on ServiceHub</p>
       </div>
       <div className="flex items-center gap-2 w-full sm:w-auto">
-        <Button variant="secondary" size="md" leftIcon={<Calendar className="w-4 h-4" />}>Book Instant</Button>
+        <Button variant="secondary" size="md" href="/book" leftIcon={<Calendar className="w-4 h-4" />}>Book Instant</Button>
         <Button variant="outline" size="md" leftIcon={<MessageSquare className="w-4 h-4" />}>Message Provider</Button>
       </div>
     </div>
@@ -433,7 +434,7 @@ export default function ProfilePage() {
           <input className="w-full h-11 px-3.5 rounded-lg bg-surface-container-low text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container" placeholder="(512) 000-0000" type="tel" />
         </div>
         <div className="pt-2 space-y-2">
-          <Button variant="secondary" size="lg" fullWidth rightIcon={<ArrowRight className="w-4 h-4" />}>Book Instant Dispatch</Button>
+          <Button variant="secondary" size="lg" href="/book" fullWidth rightIcon={<ArrowRight className="w-4 h-4" />}>Book Instant Dispatch</Button>
           <Button variant="outline" size="md" fullWidth>Request Written Estimate</Button>
         </div>
       </form>

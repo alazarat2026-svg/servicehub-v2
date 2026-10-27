@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { Button, DenseProviderCard, CheckShieldIcon } from "@/components/ui";
 import { ChevronRight, ChevronUp, ChevronDown, Star, ShieldCheck, BadgeCheck, FilterX, MapPin, X, Search } from "lucide-react";
 
@@ -97,14 +98,14 @@ export default function SearchPage() {
         <div className="max-w-7xl w-full mx-auto flex items-center justify-between">
           {/* Left: Brand Logo + Location Pill */}
           <div className="flex items-center gap-5">
-            <a href="#" className="flex items-center gap-2.5 group">
+            <Link href="/" className="flex items-center gap-2.5 group">
               <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center shrink-0 shadow-sm">
                 <CheckShieldIcon className="w-5 h-5 text-secondary" />
               </div>
               <span className="text-xl font-bold tracking-tight text-primary">
                 Service<span className="text-secondary">Hub</span>
               </span>
-            </a>
+            </Link>
             {/* Location Selector Pill */}
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-surface-container-low border border-border rounded-full text-sm text-primary cursor-pointer hover:bg-surface-container transition-colors">
               <div className="w-4 h-4 text-secondary shrink-0 flex items-center justify-center">
@@ -146,12 +147,12 @@ export default function SearchPage() {
           </div>
           {/* Center: Navigation Pills */}
           <nav className="hidden md:flex items-center gap-1 p-1 bg-surface-container-low rounded-full border border-border/70">
-            <a
-              href="#"
+            <Link
+              href="/search"
               className="px-4 py-1.5 rounded-full text-xs font-semibold bg-primary text-white shadow-sm transition-colors"
             >
               Find Pros
-            </a>
+            </Link>
             <a
               href="#services"
               className="px-4 py-1.5 rounded-full text-xs font-medium text-neutral hover:text-primary transition-colors"

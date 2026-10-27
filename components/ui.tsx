@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 // ============================================================================
 // Icons (Inline SVG to remain zero-dependency)
@@ -57,6 +58,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  href?: string;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -71,6 +73,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       rightIcon,
       className = "",
       disabled,
+      href,
       ...props
     },
     ref
@@ -91,6 +94,19 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       md: "h-11 px-5 text-label-lg rounded-md gap-2",
       lg: "h-12 px-6 text-label-lg rounded-md gap-2.5",
     };
+
+    if (href) {
+      return (
+        <Link
+          href={href}
+          className={`inline-flex items-center justify-center font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none select-none active:scale-[0.99] cursor-pointer ${variantStyles[variant]} ${sizeStyles[size]} ${fullWidth ? "w-full" : ""} ${className}`}
+        >
+          {leftIcon}
+          <span>{children}</span>
+          {rightIcon}
+        </Link>
+      );
+    }
 
     return (
       <button
@@ -386,6 +402,7 @@ export function ProviderCard({
           <Button
             variant="outline"
             size="sm"
+            href="/profile"
             onClick={onViewProfile}
             className="flex-1"
           >
@@ -394,6 +411,7 @@ export function ProviderCard({
           <Button
             variant="primary"
             size="sm"
+            href="/profile"
             onClick={onBook}
             className="flex-1"
           >
@@ -547,10 +565,10 @@ export function DenseProviderCard({
           </div>
         )}
         <div className="flex items-center gap-2 ml-auto">
-          <Button variant="outline" size="sm" onClick={onViewProfile}>
+          <Button variant="outline" size="sm" href="/profile" onClick={onViewProfile}>
             {viewProfileText}
           </Button>
-          <Button variant="secondary" size="sm" onClick={onBook}>
+          <Button variant="secondary" size="sm" href="/book" onClick={onBook}>
             {bookText}
           </Button>
         </div>
