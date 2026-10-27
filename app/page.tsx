@@ -1,4 +1,5 @@
 import React from "react";
+import { supabase, type Provider } from "@/lib/supabase";
 import Link from "next/link";
 import {
   Button,
@@ -10,7 +11,13 @@ import {
   StarIcon,
 } from "@/components/ui";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { data: topProviders } = await supabase
+    .from("providers")
+    .select("*")
+    .order("rating", { ascending: false })
+    .limit(3);
+
   return (
     <div className="min-h-screen bg-background text-on-surface font-sans flex flex-col antialiased">
       {/* =====================================================================
@@ -643,46 +650,20 @@ export default function HomePage() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-            {/* Pro 1: Mark O'Connell */}
-            <ProviderCard
-              name="Mark O'Connell"
-              trade="O'Connell Electric Co. • Master Electrician"
-              rating={4.98}
-              reviewCount={312}
-              startingPrice="From $85/hr"
-              responseTime="~8 min reply"
-              reviewQuote="Rewired our 1940s craftsman home impeccably. Completely upfront pricing with zero dust left behind."
-              imageUrl="https://lh3.googleusercontent.com/aida-public/AB6AXuBgQ1vYO6Pn0AqAKK9mr_U4jKdA21K9lMG0wRiZ5N4iy7wwRFnYQyPHeCnBjJKuvn2JwAvf-9DxNkvp0w8jCjw2W7UiwQJChXeOk3j2aGbluD-hnfvVoqnkRW6yUond-HtiA5iKY4AZeMI2lK7KHlMaQ0uczK0eVseeoezd9OZPp1UGCC-Auqkg6DRqNLhTfVcLovnwN_CeV9zSjDv2CBILGFHVF0HvI2_y1cBeGB3wHIj4UVQbIniajw"
-              bookText="Book Instant"
-            />
-
-            {/* Pro 2: Marcus Vance */}
-            <ProviderCard
-              name="Marcus Vance"
-              trade="Apex Modern Plumbing Co. • Master Plumber"
-              rating={4.95}
-              reviewCount={240}
-              startingPrice="Free Quote"
-              responseTime="~15 min reply"
-              reviewQuote="Discovered a slab leak at 7 PM. Marcus was here in 40 minutes, isolated it precisely, saved our wood floors."
-              imageUrl="https://lh3.googleusercontent.com/aida-public/AB6AXuC8KvqJduvjaTV1IKGM8VQlQCOpsJ-EUsZZmQhhjidvhpfVyptYWhAAYXvp00ABH3xoG3OVLExX5MqgiiUrKxDXS2_00b4_XE-vsutKr4WJ4LwnNesoicl8dIQDC3vFBTSSnsezw3_HwjOXJpfK7h1HMROFDAd95LiFFjv0CusyawVnvRDHdBmsUxe6uk6ijvZVBbQP-IuHO6Y9w0NFDOpk4aY1zMXib8rET8p_Y8q3V4OWXSoHKA8fzw"
-              bookText="Request Quote"
-            />
-
-            {/* Pro 3: Elena Rostova */}
-            <ProviderCard
-              name="Elena Rostova"
-              trade="Rostova Climate Care • HVAC Master Mech"
-              rating={4.99}
-              reviewCount={420}
-              startingPrice="From $95/hr"
-              responseTime="~12 min reply"
-              reviewQuote="Diagnosed heat pump compressor noise immediately and resolved it same afternoon. Our electric bill dropped 30%."
-              imageUrl="https://lh3.googleusercontent.com/aida-public/AB6AXuBZisMPudeNA9kR7Eu_yoxez7ctvLL_zF6dy9tDUUU0Md6hMU37Sb52-dUXHZCFHfcfv49xtbsugT-Ca3JIgTJDjSNfgQjCoQEwlFm6S8jxQ1_WV6N-8P1iNA0fSw7bcLmO82yMwq7VOp00zmF4Ia4kZpq7n-liKUx5conCif8tupfouFRo4PjIF0ah8BUOKpqbNxPT4yRKKcDEgnEDBz0jJfkrlAlU-QzvYpJKaffkQW_GKSiaBWiQOg"
-              bookText="Book Instant"
-            />
-          </div>
-        </section>
+            {(topProviders ?? []).map((provider: Provider) => (
+              <ProviderCard
+                key={provider.id}
+                name={provider.name}
+                trade={`${provider.company} • ${provider.trade}`}
+                rating={provider.rating}
+                reviewCount={provider.review_count}
+                startingPrice={`From $${provider.hourly_rate}/hr`}
+                reviewQuote={provider.bio ?? ""}
+                imageUrl={provider.image_url}
+                bookText="Book Instant"
+              />
+            ))}
+          </div>        </section>
 
         {/* =====================================================================
             7. EDITORIAL CLOSING

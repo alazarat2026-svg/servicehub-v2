@@ -1,11 +1,34 @@
 "use client";
 
 import React from "react";
+import { supabase, type Provider, type Review } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button, CheckShieldIcon } from "@/components/ui";
 import { ChevronRight, BadgeCheck, Calendar, MessageSquare, ShieldCheck, Shield, MapPin, Zap, Award, Star, ChevronDown, ArrowRight, CheckCircle2, Lock, Headphones, Clock } from "lucide-react";
 
 export default function ProfilePage() {
+  const [provider, setProvider] = useState<Provider | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: providerData } = await supabase
+        .from("providers")
+        .select("*")
+        .eq("name", "Elena Rostova")
+        .single();
+      setProvider(providerData);
+      if (providerData?.id) {
+        const { data: reviewData } = await supabase
+          .from("reviews")
+          .select("*")
+          .eq("provider_id", providerData.id);
+        setReviews(reviewData ?? []);
+      }
+    })();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-on-surface font-sans flex flex-col antialiased">
       <header className="fixed top-0 left-0 w-full h-20 bg-white z-50 border-b border-border shadow-sm flex justify-between items-center px-6">
@@ -133,19 +156,19 @@ export default function ProfilePage() {
       <div className="relative shrink-0">
         <div className="w-40 h-40 rounded-2xl overflow-hidden bg-surface-container">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzezTLQhzSSJ_uiZtw_6iESAJNLtnzNzpjbAetpm1fQfC-2Jz6rBN32AnPNMTZRFkkm9RJeB8uOY8atrxvmMHJ8U2ummO2As0s_WLPAOLcdA9ZEVbtTFsb0SXqXpwKwSW0_XdZl8ndQIkXCBoFrno_37doIcLxva9vGr9Yos4UhkPZvzM0h7QTq5X67EZa8yKxSsF3tj8ozNP9_ebQgX0uEXNe8f9qUQcT7DnU7H1_vwmyorfOYS5crg" alt="Elena Rostova" className="w-full h-full object-cover" />
+          <img src={provider?.image_url ?? "https://lh3.googleusercontent.com/aida-public/AB6AXuBzezTLQhzSSJ_uiZtw_6iESAJNLtnzNzpjbAetpm1fQfC-2Jz6rBN32AnPNMTZRFkkm9RJeB8uOY8atrxvmMHJ8U2ummO2As0s_WLPAOLcdA9ZEVbtTFsb0SXqXpwKwSW0_XdZl8ndQIkXCBoFrno_37doIcLxva9vGr9Yos4UhkPZvzM0h7QTq5X67EZa8yKxSsF3tj8ozNP9_ebQgX0uEXNe8f9qUQcT7DnU7H1_vwmyorfOYS5crg"} alt={provider?.name ?? "Elena Rostova"} className="w-full h-full object-cover" />
         </div>
         <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white shadow-sm">
           <BadgeCheck className="w-6 h-6" />
         </div>
       </div>
       <div className="min-w-0">
-        <h1 className="text-4xl font-bold text-[#0F172A]">Elena Rostova</h1>
-        <p className="text-lg text-on-surface-variant mt-1">Master HVAC Specialist · Rostova Climate Care</p>
+        <h1 className="text-4xl font-bold text-[#0F172A]">{provider?.name ?? "Elena Rostova"}</h1>
+        <p className="text-lg text-on-surface-variant mt-1">{provider?.trade ?? "Master HVAC Specialist"} · {provider?.company ?? "Rostova Climate Care"}</p>
         <div className="flex flex-wrap items-center gap-2 mt-2 text-sm text-on-surface-variant">
-          <span className="flex items-center gap-1"><ShieldCheck className="w-4 h-4 text-secondary" /> TX Master License #TACLA0189</span>
+          <span className="flex items-center gap-1"><ShieldCheck className="w-4 h-4 text-secondary" /> {provider?.license ?? "TX Master License #TACLA0189"}</span>
           <span className="text-outline">·</span>
-          <span className="flex items-center gap-1"><MapPin className="w-4 h-4 text-secondary" /> Serving Central &amp; West Austin, TX</span>
+          <span className="flex items-center gap-1"><MapPin className="w-4 h-4 text-secondary" /> Serving {provider?.location ?? "Central & West Austin, TX"}</span>
         </div>
         <div className="flex flex-wrap items-center gap-2 mt-3">
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-low text-sm text-on-surface"><Zap className="w-3.5 h-3.5 text-secondary" /> Energy Star Partner</span>
@@ -158,9 +181,9 @@ export default function ProfilePage() {
       <div className="lg:text-right">
         <div className="flex items-center lg:justify-end gap-1.5">
           <Star className="w-7 h-7 text-secondary fill-secondary" />
-          <span className="text-3xl font-extrabold text-on-surface">4.99</span>
+          <span className="text-3xl font-extrabold text-on-surface">{provider?.rating ?? 4.99}</span>
         </div>
-        <p className="text-sm text-on-surface-variant mt-0.5">420 verified client reviews · 8 years on ServiceHub</p>
+        <p className="text-sm text-on-surface-variant mt-0.5">{provider?.review_count ?? 420} verified client reviews · 8 years on ServiceHub</p>
       </div>
       <div className="flex items-center gap-2 w-full sm:w-auto">
         <Button variant="secondary" size="md" href="/book" leftIcon={<Calendar className="w-4 h-4" />}>Book Instant</Button>
@@ -179,10 +202,7 @@ export default function ProfilePage() {
     <section className="bg-surface-container-lowest rounded-2xl p-6 lg:p-8 shadow-sm">
       <span className="text-label-caps uppercase text-secondary font-bold tracking-wider block mb-1">ABOUT</span>
       <h2 className="text-headline-md text-on-surface mb-4">Trusted HVAC specialist for Austin&apos;s historic and luxury architecture.</h2>
-      <div className="text-body-md text-on-surface-variant space-y-4 leading-relaxed">
-        <p>With over 14 years specializing in variable refrigerant flow (VRF) and inverter heat pump commissioning, Elena Rostova has become the foremost climate systems authority for historic Craftsman, Mid-Century Modern, and Tudor residences throughout Clarksville, Hyde Park, Pemberton Heights, and Westlake. Her approach pairs high-performance thermal balance with non-invasive duct architecture to preserve original millwork and shiplap finishes.</p>
-        <p>Rostova Climate Care strictly enforces transparent flat-rate commission tiers, detailed calibrated airflow static pressure testing, and medical-grade job site cleanliness. Every commission begins with whole-home load calculations (Manual J &amp; S) to eliminate oversized equipment cycling and deliver whisper-quiet cooling across Austin&apos;s demanding summer peak months.</p>
-      </div>
+      <div className="text-body-md text-on-surface-variant space-y-4 leading-relaxed"><p>{provider?.bio ?? ""}</p></div>
       <div className="mt-6 pt-4">
         <span className="text-label-caps text-on-surface-variant uppercase tracking-wider block mb-2">Core Capabilities &amp; Specialties</span>
         <div className="flex flex-wrap gap-2">
@@ -293,10 +313,10 @@ export default function ProfilePage() {
       <div className="flex flex-col md:flex-row items-center gap-6 p-6 rounded-xl bg-surface-container-low/60 mb-6">
         <div className="text-center md:text-left shrink-0">
           <div className="flex items-center justify-center md:justify-start gap-1.5">
-            <span className="text-3xl font-extrabold text-on-surface leading-none">4.99</span>
+            <span className="text-3xl font-extrabold text-on-surface leading-none">{provider?.rating ?? 4.99}</span>
             <Star className="w-8 h-8 text-secondary fill-secondary" />
           </div>
-          <p className="text-body-sm text-on-surface-variant mt-1.5">Based on 420 verified client jobs</p>
+          <p className="text-body-sm text-on-surface-variant mt-1.5">Based on {provider?.review_count ?? 420} verified client jobs</p>
           <div className="flex items-center justify-center md:justify-start gap-1 mt-2 text-secondary">
             <BadgeCheck className="w-4 h-4" />
             <span className="text-label-md font-semibold text-on-surface">100% Verified Service</span>
@@ -331,66 +351,27 @@ export default function ProfilePage() {
         </div>
       </div>
       <div className="space-y-4">
-
-        <article className="p-6 rounded-xl bg-surface-container-low/40">
-          <div className="flex items-start justify-between gap-3 mb-3">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-headline-sm font-semibold text-on-surface">Julianne T.</span>
-                <CheckCircle2 className="w-4 h-4 text-secondary" />
-                <span className="text-label-md text-secondary">Verified Project</span>
+        {(reviews ?? []).map((review: Review) => (
+          <article key={review.id} className="p-6 rounded-xl bg-surface-container-low/40">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-headline-sm font-semibold text-on-surface">{review.author_name}</span>
+                  <CheckCircle2 className="w-4 h-4 text-secondary" />
+                  <span className="text-label-md text-secondary">Verified Project</span>
+                </div>
+                <span className="text-body-sm text-on-surface-variant">{new Date(review.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
               </div>
-              <span className="text-body-sm text-on-surface-variant">Clarksville, Austin · April 2026</span>
-            </div>
-            <div className="flex items-center text-secondary">
-              <Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" />
-            </div>
-          </div>
-          <p className="text-body-md text-on-surface-variant leading-relaxed">&ldquo;Diagnosed our dual heat pump compressor failure immediately and completed repairs same afternoon without upcharging. Elena took time to test our airflow distribution across our upper gallery and found a restrictive register damper that had been running our bills up for two years. Cleanest technician we&apos;ve ever hired.&rdquo;</p>
-          <div className="mt-3 flex items-center gap-2 text-label-caps text-on-surface-variant">
-            <span>COMMISSION: VARIABLE REFRIGERANT REPAIR</span><span>·</span><span>$50,000 GUARANTEE APPLIED</span>
-          </div>
-        </article>
-        <article className="p-6 rounded-xl bg-surface-container-low/40">
-          <div className="flex items-start justify-between gap-3 mb-3">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-headline-sm font-semibold text-on-surface">David M.</span>
-                <CheckCircle2 className="w-4 h-4 text-secondary" />
-                <span className="text-label-md text-secondary">Verified Project</span>
+              <div className="flex items-center text-secondary">
+                {Array.from({ length: review.rating }).map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-secondary" />
+                ))}
               </div>
-              <span className="text-body-sm text-on-surface-variant">Barton Creek, Austin · March 2026</span>
             </div>
-            <div className="flex items-center text-secondary">
-              <Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" />
-            </div>
-          </div>
-          <p className="text-body-md text-on-surface-variant leading-relaxed">&ldquo;Superb craftsmanship on our ultra-quiet multi-zone inverter installation. Cleanest wiring job I have seen in 30 years of homeownership. Our energy bill dropped 30% on the first cycle and the master wing is completely silent even during 102-degree afternoon heat.&rdquo;</p>
-          <div className="mt-3 flex items-center gap-2 text-label-caps text-on-surface-variant">
-            <span>COMMISSION: WHOLE-HOME INVERTER SYSTEM</span><span>·</span><span>$50,000 GUARANTEE APPLIED</span>
-          </div>
-        </article>
-        <article className="p-6 rounded-xl bg-surface-container-low/40">
-          <div className="flex items-start justify-between gap-3 mb-3">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-headline-sm font-semibold text-on-surface">Marcus Vance</span>
-                <CheckCircle2 className="w-4 h-4 text-secondary" />
-                <span className="text-label-md text-secondary">Verified Project</span>
-              </div>
-              <span className="text-body-sm text-on-surface-variant">Hyde Park, Austin · March 2026</span>
-            </div>
-            <div className="flex items-center text-secondary">
-              <Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" /><Star className="w-4 h-4 fill-secondary" />
-            </div>
-          </div>
-          <p className="text-body-md text-on-surface-variant leading-relaxed">&ldquo;Elena retrofitted our 1928 bungalow&apos;s multi-zone mini-split system without tearing into original shiplap walls. Punctual, hyper-knowledgeable, and totally upfront on every component line-item. She treated the architecture with deep respect.&rdquo;</p>
-          <div className="mt-3 flex items-center gap-2 text-label-caps text-on-surface-variant">
-            <span>COMMISSION: ARCHITECTURAL RETROFIT</span><span>·</span><span>$50,000 GUARANTEE APPLIED</span>
-          </div>
-        </article>
-      </div>
-      <button className="w-full py-3.5 mt-6 rounded-xl bg-surface-container-low text-on-surface text-label-lg font-semibold hover:bg-surface-container transition-colors">Load 10 More Verified Reviews</button>
+            <p className="text-body-md text-on-surface-variant leading-relaxed">&ldquo;{review.content}&rdquo;</p>
+          </article>
+        ))}
+      </div>      <button className="w-full py-3.5 mt-6 rounded-xl bg-surface-container-low text-on-surface text-label-lg font-semibold hover:bg-surface-container transition-colors">Load 10 More Verified Reviews</button>
     </section>
   </div>
 
@@ -407,7 +388,7 @@ export default function ProfilePage() {
         </span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="text-3xl font-extrabold text-on-surface tracking-tight">From $95</span>
+        <span className="text-3xl font-extrabold text-on-surface tracking-tight">From ${provider?.hourly_rate ?? 95}</span>
         <span className="text-body-sm text-on-surface-variant">/ hour</span>
       </div>
       <p className="text-body-sm text-on-surface-variant mt-0.5">Free comprehensive on-site quote · Zero callout charge</p>

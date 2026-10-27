@@ -1,96 +1,30 @@
+"use client";
+
 import React from "react";
+import { supabase, type Provider } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button, DenseProviderCard, CheckShieldIcon } from "@/components/ui";
 import { ChevronRight, ChevronUp, ChevronDown, Star, ShieldCheck, BadgeCheck, FilterX, MapPin, X, Search } from "lucide-react";
 
-const providers = [
-  {
-    name: "Elena Rostova",
-    trade: "Rostova Climate Care · Master HVAC #TACLA0189",
-    rating: 4.99,
-    reviewCount: 420,
-    location: "Central & West Austin",
-    quote:
-      "Diagnosed our dual heat pump compressor failure immediately and completed repairs same afternoon.",
-    tags: ["Heat Pumps", "Ductless Mini-Splits", "Emergency Triage"],
-    rate: "$95/hr",
-    reply: "~12 min reply",
-    portraitUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBzezTLQhzSSJ_uiZtw_6iESAJNLtnzNzpjbAetpm1fQfC-2Jz6rBN32AnPNMTZRFkkm9RJeB8uOY8atrxvmMHJ8U2ummO2As0s_WLPAOLcdA9ZEVbtTFsb0SXqXpwKwSW0_XdZl8ndQIkXCBoFrno_37doIcLxva9vGr9Yos4UhkPZvzM0h7QTq5X67EZa8yKxSsF3tj8ozNP9_ebQgX0uEXNe8f9qUQcT7DnU7H1_vwmyorfOYS5crg",
-  },
-  {
-    name: "Austin Apex Climate Solutions",
-    trade: "David Chen · Energy Auditor & Class A Contractor",
-    rating: 4.96,
-    reviewCount: 310,
-    location: "North & Central Austin",
-    quote:
-      "Calculated airflow dynamics and lowered our energy bill by 35% with smart zoned dampening.",
-    tags: ["Commercial & Res", "24/7 Dispatch", "Air Filtration"],
-    rate: "$89/hr",
-    reply: "~9 min reply",
-    portraitUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAX65OI9ky5BNxA08kUC5UTflkvUiVrzHu9ri3nWcRo9_wR3GmzYuQwhzCynKjjA8T38ACXXL_gLz4ZGTUE9eoDy7c6fpENJ5ITGZlD1s7UiQtrEXeHO7ZqERjbJH9meBKmolgpiPo5v0ScJ2OK9lOu9u7ruiVsABlTzRXGNfuFoxUljEUD5bdJeEJZL3kb874q-obFd4054LxoMjKaaC7VK2ymvQdRuMpKH0-LS877Wj42rQiGQQaPdA",
-  },
-  {
-    name: "Travis County Thermal Pros",
-    trade: "Sarah Jenkins · Master Hydronics & HVAC Lead",
-    rating: 4.98,
-    reviewCount: 195,
-    location: "South Austin & Oak Hill",
-    quote:
-      "Replaced blown condenser coils during a 105° heatwave on a Sunday without upcharging.",
-    tags: ["Carrier Certified", "Eco Refrigerants", "Same-Day Fix"],
-    rate: "$105/hr",
-    reply: "~15 min reply",
-    portraitUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBTF-enUJkKd0URMQBD-HLV8f4QqfIjNt80PI2nLR_R9Gg3QOmMWzTmrMMfnbAjEfKdbFSqka79Pk9RYTsuUb6cppdH0NC12FAsV-KLDmxRZ_wZONTmTbFtWNULPgnA92RyXzkK1AwXnowBsYhUDr_aQcra0xmsKtxfUbaHRqFN3TvxYAd1YtMXiWikcS7k_LpQBlDPSFPMykBDzn_V8ol4lmDYltFx5SyYPhwwCVzvv6xfF7JM-PX0pQ",
-  },
-  {
-    name: "Barton Springs Air & Heating",
-    trade: "Carlos Mendez · Dual Licensed Master Electrician & HVAC",
-    rating: 4.94,
-    reviewCount: 260,
-    location: "Downtown & Clarksville",
-    quote:
-      "Flawlessly retrofitted multi-zone smart climate control into our 1920s historic bungalow.",
-    tags: ["Smart Controls", "Zoned Systems", "Historic Homes"],
-    rate: "$90/hr",
-    reply: "~7 min reply",
-    portraitUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBMNrtT4WwoE0fzQUMZiETP5RcmyXqFe1Ze-BzDdQ2vXXX7oZdFtasuLTFYfhVmvj4QxSz1yVAjcPBm9vqXcTw0paN6i5NBHSUx3kHLzFFJSO6WqEW4ZQc7IXS55_t3DzJFYwHEYddLp4AZ9EzjNYk3ohAxX3fGd5_ud_PEWwcDm4Gxj9lTEI9Io1kDhcIbukuOQisBoef0wWlzvV2JEEz7-J5h-UwYv_8X235CinKht0gbTTpQTohYww",
-  },
-  {
-    name: "Lone Star Precision Cooling",
-    trade: "Marcus Vance Team · Factory Certified Trane Specialist",
-    rating: 4.95,
-    reviewCount: 180,
-    location: "East Austin & Mueller",
-    quote:
-      "Pinned down an elusive micro-leak in the attic evaporator coil that two other companies missed.",
-    tags: ["A/C Tune-Up", "Coil Replacement", "Leak Detection"],
-    rate: "$85/hr",
-    reply: "~10 min reply",
-    portraitUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBEPDuiETmV07QJS0bbUKAzqjQV_HJV1npVa6wd_EVpI3XcwEotGKGxa5h7neNvTx_ILs_1JO6975_uBtRKVFoGOcdeODCreSynLlE0cyv2MWHp40Z26PSaN_zEp6_kycx4mKv-_P4pYUDtVYqmGayy5n0G6JliR9mf1_QpG_yJDjm-8zD4S6L0pNlDe3pJ_rmosTna0yaqkaXCS-te5YQN-56dz8l41yWm3gNFKMuwii0sH4hfIv-BFQ",
-  },
-  {
-    name: "Green Valley Climate Guild",
-    trade: "Rachel Vance · Geothermal & High-Efficiency Fellow",
-    rating: 4.97,
-    reviewCount: 142,
-    location: "Westlake & Rollingwood",
-    quote:
-      "Superb craftsmanship on our ultra-quiet inverter installation. Cleanest wiring job I have seen.",
-    tags: ["Energy Star Pro", "Geothermal", "Air Scrubber Plus"],
-    rate: "$110/hr",
-    reply: "~14 min reply",
-    portraitUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDWG9BDlWUL1gaWAicce5wRIBpy2M1yWKwQP9BH9JpE3aNIfbakGJMyAPR4M_JAMBZuzZV9XUv7slUdbMXy1mK3EPf7-s79fZtDcb0XttbgXDY9qrCnYL6VtHHrF4XgtdzAvMaoysa7K0s_HPCyWFp3RlVZTOjiAiG52_Efsnw2ACvYxB2LPTGER4OjcJbXg0DD7j0udMQEI7sQDVb0o9-UTXPQuX2BRiBBIxhTvSZL2Cyjxp92ovEQNg",
-  },
-];
 
 export default function SearchPage() {
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    supabase
+      .from("providers")
+      .select("*")
+      .then(({ data }) => setProviders(data ?? []));
+  }, []);
+
+  const filteredProviders = providers.filter((provider) =>
+    `${provider.name} ${provider.trade} ${provider.company}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-background text-on-surface font-sans flex flex-col antialiased">
       {/* Header (copied exactly from homepage) */}
@@ -475,19 +409,29 @@ export default function SearchPage() {
                 </button>
               </div>
 
+              {/* Search Input */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name or trade..."
+                  className="w-full h-11 px-4 rounded-xl border border-border bg-white text-on-surface placeholder:text-neutral focus:outline-none focus:ring-2 focus:ring-secondary/40"
+                />
+              </div>
+
               {/* Results Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {providers.map((p) => (
+                {filteredProviders.map((p: Provider) => (
                   <DenseProviderCard
-                    key={p.name}
+                    key={p.id}
                     name={p.name}
-                    trade={p.trade}
+                    trade={`${p.company} · ${p.trade}`}
                     rating={p.rating}
-                    reviewCount={p.reviewCount}
-                    portraitUrl={p.portraitUrl}
-                    quote={p.quote}
-                    rate={p.rate}
-                    tags={p.tags}
+                    reviewCount={p.review_count}
+                    portraitUrl={p.image_url}
+                    quote={p.bio}
+                    rate={`$${p.hourly_rate}/hr`}
                     viewProfileText="Profile"
                     bookText="Book Instant"
                   />

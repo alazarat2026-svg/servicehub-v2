@@ -1,11 +1,50 @@
 "use client";
 
 import React from "react";
+import { useState } from "react";
 import { Button, CheckShieldIcon } from "@/components/ui";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import { ChevronRight, Lock, Check, Calendar, Clock, Star, ShieldCheck, CreditCard, User, Mail, MapPin, CheckCircle2, ArrowLeft, ArrowRight, Wrench } from "lucide-react";
 
 export default function BookPage() {
+  const router = useRouter();
+  const [step, setStep] = useState(2);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    try {
+      const { data: provider, error: providerError } = await supabase
+        .from("providers")
+        .select("id")
+        .eq("name", "Elena Rostova")
+        .single();
+      if (providerError || !provider) throw providerError ?? new Error("Provider not found");
+      const { error: insertError } = await supabase.from("bookings").insert({
+        provider_id: provider.id,
+        customer_name: customerName,
+        customer_email: customerEmail,
+        service_type: "Diagnostic & Repair Dispatch",
+        booking_date: selectedDate,
+        booking_time: selectedTime,
+        total_price: 145,
+        status: "confirmed",
+      });
+      if (insertError) throw insertError;
+      router.push("/book/confirmation");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Booking failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-on-surface font-sans flex flex-col antialiased">
       <header className="fixed top-0 left-0 w-full h-20 bg-white z-50 border-b border-border shadow-sm flex justify-between items-center px-6">
@@ -72,7 +111,7 @@ export default function BookPage() {
               <span>Stripe escrow protected · $50,000 guarantee</span>
             </div>
           </div>
-          <div className="grid grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-12 gap-8 items-start" data-step={step}>
             <div className="col-span-8 space-y-6">
               {/* Progress Indicator */}
               <div className="bg-white border border-border rounded-2xl p-6">
@@ -126,9 +165,10 @@ export default function BookPage() {
                     { day: "Sat", date: "26", label: "FULL" },
                     { day: "Sun", date: "27", label: "CLOSED" },
                   ].map((d) => {
-                    const selected = d.day === "Tue";
+                    const dateValue = `2026-11-${String(d.date).padStart(2, "0")}`;
+                    const selected = selectedDate === dateValue;
                     return (
-                      <button key={d.day + d.date} className={`flex flex-col items-center justify-center py-2.5 rounded-xl border text-sm font-semibold transition-colors ${selected ? "bg-secondary text-white border-secondary" : "bg-white text-primary border-border hover:border-secondary"}`}>
+                      <button key={d.day + d.date} onClick={() => setSelectedDate(dateValue)} className={`flex flex-col items-center justify-center py-2.5 rounded-xl border text-sm font-semibold transition-colors ${selected ? "bg-secondary text-white border-secondary" : "bg-white text-primary border-border hover:border-secondary"}`}>
                         <span className="text-xs font-medium">{d.day}</span>
                         <span className="text-base">{d.date}</span>
                         <span className={`text-[10px] mt-1 ${selected ? "text-white/80" : "text-neutral"}`}>{d.label}</span>
@@ -140,27 +180,50 @@ export default function BookPage() {
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wider text-neutral mb-2">Morning</p>
                     <div className="grid grid-cols-3 gap-3">
-                      {["8:00 AM", "9:30 AM", "11:00 AM"].map((slot) => (
-                        <button key={slot} className="py-2.5 rounded-lg border text-sm font-semibold transition-colors bg-white text-primary border-border hover:border-secondary">
-                          {slot}
-                        </button>
-                      ))}
+                      {["8:00 AM", "9:30 AM", "11:00 AM"].map((slot) => {
+                        const selected = selectedTime === slot;
+                        return (
+                          <button key={slot} onClick={() => setSelectedTime(slot)} className={`py-2.5 rounded-lg border text-sm font-semibold transition-colors ${selected ? "bg-secondary text-white border-secondary flex flex-col items-center" : "bg-white text-primary border-border hover:border-secondary"}`}>
+                            {selected ? (
+                              <>
+                                <span className="flex items-center gap-1">{slot} <Check className="w-4 h-4" /></span>
+                                <span className="text-[10px] font-medium text-white/80">Selected</span>
+                              </>
+                            ) : (
+                              slot
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wider text-neutral mb-2">Afternoon</p>
                     <div className="grid grid-cols-3 gap-3">
-                      <button className="py-2.5 rounded-lg border text-sm font-semibold transition-colors bg-surface-container-low text-neutral border-border cursor-not-allowed flex flex-col items-center">
-                        1:00 PM
-                        <span className="text-[10px] font-medium text-neutral">Booked</span>
-                      </button>
-                      <button className="py-2.5 rounded-lg border text-sm font-semibold transition-colors bg-secondary text-white border-secondary flex flex-col items-center">
-                        <span className="flex items-center gap-1">2:30 PM <Check className="w-4 h-4" /></span>
-                        <span className="text-[10px] font-medium text-white/80">Selected</span>
-                      </button>
-                      <button className="py-2.5 rounded-lg border text-sm font-semibold transition-colors bg-white text-primary border-border hover:border-secondary">
-                        4:00 PM
-                      </button>
+                      {["1:00 PM", "2:30 PM", "4:00 PM"].map((slot) => {
+                        const booked = slot === "1:00 PM";
+                        const selected = selectedTime === slot;
+                        if (booked) {
+                          return (
+                            <button key={slot} className="py-2.5 rounded-lg border text-sm font-semibold transition-colors bg-surface-container-low text-neutral border-border cursor-not-allowed flex flex-col items-center">
+                              {slot}
+                              <span className="text-[10px] font-medium text-neutral">Booked</span>
+                            </button>
+                          );
+                        }
+                        return (
+                          <button key={slot} onClick={() => setSelectedTime(slot)} className={`py-2.5 rounded-lg border text-sm font-semibold transition-colors ${selected ? "bg-secondary text-white border-secondary flex flex-col items-center" : "bg-white text-primary border-border hover:border-secondary"}`}>
+                            {selected ? (
+                              <>
+                                <span className="flex items-center gap-1">{slot} <Check className="w-4 h-4" /></span>
+                                <span className="text-[10px] font-medium text-white/80">Selected</span>
+                              </>
+                            ) : (
+                              slot
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -171,7 +234,7 @@ export default function BookPage() {
                 </div>
                 <div className="flex justify-end gap-3">
                   <Button variant="outline" size="md"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
-                  <Button variant="primary" size="md">Continue to Details <ArrowRight className="w-4 h-4 ml-1" /></Button>
+                  <Button variant="primary" size="md" onClick={() => setStep(3)}>Continue to Details <ArrowRight className="w-4 h-4 ml-1" /></Button>
                 </div>
               </div>
               {/* Step 3 Details */}
@@ -180,11 +243,11 @@ export default function BookPage() {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div>
                     <label className="block text-xs font-semibold text-neutral mb-1.5">Full Name</label>
-                    <input type="text" placeholder="Full Name" className="w-full px-3 py-2.5 rounded-lg border-0 bg-surface-container-low text-sm" />
+                    <input type="text" placeholder="Full Name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border-0 bg-surface-container-low text-sm" />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-neutral mb-1.5">Email</label>
-                    <input type="email" placeholder="Email" className="w-full px-3 py-2.5 rounded-lg border-0 bg-surface-container-low text-sm" />
+                    <input type="email" placeholder="Email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border-0 bg-surface-container-low text-sm" />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-neutral mb-1.5">Phone</label>
@@ -232,10 +295,10 @@ export default function BookPage() {
                 <h3 className="text-headline-sm font-bold text-primary mb-5">Review and confirm</h3>
                 <div className="bg-surface-container-low rounded-xl p-4 space-y-2 text-sm mb-5">
                   <div className="flex items-center gap-2"><Wrench className="w-4 h-4 text-neutral" /><span className="text-neutral">Service</span><span className="ml-auto font-semibold text-primary">Diagnostic Dispatch</span></div>
-                  <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-neutral" /><span className="text-neutral">Date</span><span className="ml-auto font-semibold text-primary">Tue, Nov 22</span></div>
+                  <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-neutral" /><span className="text-neutral">Date</span><span className="ml-auto font-semibold text-primary">{selectedDate ?? "Tue, Nov 22"}</span></div>
                   <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-neutral" /><span className="text-neutral">Address</span><span className="ml-auto font-semibold text-primary">123 Main St, Austin, TX</span></div>
                   <div className="flex items-center gap-2"><User className="w-4 h-4 text-neutral" /><span className="text-neutral">Provider</span><span className="ml-auto font-semibold text-primary">Elena Rostova</span></div>
-                  <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-neutral" /><span className="text-neutral">Contact</span><span className="ml-auto font-semibold text-primary">you@email.com</span></div>
+                  <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-neutral" /><span className="text-neutral">Contact</span><span className="ml-auto font-semibold text-primary">{customerEmail || "you@email.com"}</span></div>
                 </div>
                 <div className="bg-surface-container-low rounded-xl p-4 space-y-2 text-sm mb-5">
                   <div className="flex justify-between"><span className="text-neutral">Service</span><span className="font-semibold text-primary">$95.00</span></div>
@@ -250,7 +313,7 @@ export default function BookPage() {
                   <input type="checkbox" className="accent-secondary w-4 h-4 rounded border-border" />
                   I agree to the terms and conditions
                 </label>
-                <Button variant="primary" size="lg" fullWidth leftIcon={<Lock className="w-5 h-5" />} rightIcon={<ArrowRight className="w-5 h-5" />}>
+                <Button variant="primary" size="lg" fullWidth isLoading={isSubmitting} leftIcon={<Lock className="w-5 h-5" />} rightIcon={<ArrowRight className="w-5 h-5" />} onClick={() => { setStep(4); handleConfirm(); }}>
                   Confirm &amp; Pay $145.00
                 </Button>
               </div>
@@ -286,8 +349,8 @@ export default function BookPage() {
                 <div className="space-y-2">
                   {[
                     ["Service", "Diagnostic & Repair Dispatch"],
-                    ["Date", "Tue, Nov 12"],
-                    ["Time", "2:30 PM"],
+                    ["Date", selectedDate ?? "Select a date"],
+                    ["Time", selectedTime ?? "Select a time"],
                     ["Address", "123 Main St, Austin, TX"],
                   ].map(([k, v]) => (
                     <div key={k} className="flex justify-between items-center bg-surface-container-low rounded-lg px-3 py-2 text-sm">
